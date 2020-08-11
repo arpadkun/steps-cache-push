@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # define these in your .bitrise.secrets.yml
-  - BITRISE_CACHE_API_URL: $BITRISE_CACHE_API_URL # use file url scheme (file://) to create a cache archive in a local directory
+  #- BITRISE_CACHE_API_URL: $BITRISE_CACHE_API_URL # use file url scheme (file://) to create a cache archive in a local directory
   - ORIG_BITRISE_SOURCE_DIR: $BITRISE_SOURCE_DIR
 
 workflows:

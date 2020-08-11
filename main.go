@@ -12,7 +12,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"  // Temporarily for debugging
+	"os/exec"
 	"strings"
 	"time"
 

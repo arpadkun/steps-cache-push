@@ -12,7 +12,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"  // Temporarily for debugging
+	"os/exec" // Temporarily for debugging
 	"strings"
 	"time"
 
@@ -153,7 +153,7 @@ func main() {
 		if err != nil {
 			log.Debugf("Could not run find, failed")
 		}
-		log.Debugf("%v\n", string(output)
+		log.Debugf("%v\n", string(output))
 	}
 
 	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")

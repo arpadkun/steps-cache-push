@@ -153,16 +153,8 @@ func main() {
 		if err != nil {
 			log.Debugf("Could not run find, failed")
 		}
-		log.Debugf("Directory [%s] Contents:\n  %v\n", pth, string(output))
+		log.Debugf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
 	}
-
-	var dir = "/Users/kharpeet/.bitrise"
-	var cmd = exec.Command("find", dir)
-	output, err := cmd.Output()
-	if err != nil {
-		log.Debugf("Could not run find, failed")
-	}
-	log.Debugf("Directory [%s] Contents:\n  %v\n", dir, string(output))
 
 	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")
 	//if err != nil {

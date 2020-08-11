@@ -31,7 +31,8 @@ func logErrorfAndExit(format string, args ...interface{}) {
 
 func main() {
 	stepStartedAt := time.Now()
-
+	//K:
+	log.Debugf("AKARMI")
 	configs, err := ParseConfig()
 	if err != nil {
 		logErrorfAndExit(err.Error())
@@ -139,7 +140,7 @@ func main() {
 
 	// K:
 	for pth := range pathToIndicator {
-		log.Printf("Egy Err: %s", pth)
+		log.Debugf("EGY: %s", pth)
 	}
 
 	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")
@@ -152,7 +153,7 @@ func main() {
 		logErrorfAndExit("Failed to get stack version info: %s", err)
 	}
 	// K:
-	log.Printf("stackVersionData: %s", stackData)
+	log.Debugf("EGY stackVersionData: %s", stackData)
 
 	// This is the first file written, to speed up reading it in subsequent builds
 	//if err = archive.writeData(stackData, stackVersionsPath); err != nil {

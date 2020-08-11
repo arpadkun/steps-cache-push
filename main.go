@@ -147,7 +147,7 @@ func main() {
 
 	// K:  cycling through the files/directories that are required to be saved
 	for pth := range pathToIndicatorPath {
-
+		log.Debugf("============================================================================================")
 		log.Debugf("This is in the pathToIndicatorPath variable: %s", pth)
 		var cmd1 = exec.Command("file", pth)
 		output, err := cmd1.Output()

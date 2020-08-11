@@ -137,42 +137,50 @@ func main() {
 
 	log.Infof("Generating cache archive")
 
-	archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")
-	if err != nil {
-		logErrorfAndExit("Failed to create archive: %s", err)
+	// K:
+	for pth := range pathToIndicator {
+		log.Printf("Egy Err: %s", pth)
 	}
+
+	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")
+	//if err != nil {
+	//	logErrorfAndExit("Failed to create archive: %s", err)
+	//}
 
 	stackData, err := stackVersionData(configs.StackID)
 	if err != nil {
 		logErrorfAndExit("Failed to get stack version info: %s", err)
 	}
+	// K:
+	log.Printf("stackVersionData: %s", stackData)
+
 	// This is the first file written, to speed up reading it in subsequent builds
-	if err = archive.writeData(stackData, stackVersionsPath); err != nil {
-		logErrorfAndExit("Failed to write cache info to archive, error: %s", err)
-	}
+	//if err = archive.writeData(stackData, stackVersionsPath); err != nil {
+	//	logErrorfAndExit("Failed to write cache info to archive, error: %s", err)
+	//}
 
-	if err := archive.Write(pathToIndicatorPath); err != nil {
-		logErrorfAndExit("Failed to populate archive: %s", err)
-	}
+	//if err := archive.Write(pathToIndicatorPath); err != nil {
+	//	logErrorfAndExit("Failed to populate archive: %s", err)
+	//}
 
-	if err := archive.WriteHeader(curDescriptor, cacheInfoFilePath); err != nil {
-		logErrorfAndExit("Failed to write archive header: %s", err)
-	}
+	//if err := archive.WriteHeader(curDescriptor, cacheInfoFilePath); err != nil {
+	//	logErrorfAndExit("Failed to write archive header: %s", err)
+	//}
 
-	if err := archive.Close(); err != nil {
-		logErrorfAndExit("Failed to close archive: %s", err)
-	}
+	//if err := archive.Close(); err != nil {
+	//	logErrorfAndExit("Failed to close archive: %s", err)
+	//}
 
 	log.Donef("Done in %s\n", time.Since(startTime))
 
 	// Upload cache archive
-	startTime = time.Now()
+	//startTime = time.Now()
 
-	log.Infof("Uploading cache archive")
+	//log.Infof("Uploading cache archive")
 
-	if err := uploadArchive(cacheArchivePath, configs.CacheAPIURL); err != nil {
-		logErrorfAndExit("Failed to upload archive: %s", err)
-	}
+	//if err := uploadArchive(cacheArchivePath, configs.CacheAPIURL); err != nil {
+	//	logErrorfAndExit("Failed to upload archive: %s", err)
+	//}
 	log.Donef("Done in %s\n", time.Since(startTime))
 	log.Donef("Total time: %s", time.Since(stepStartedAt))
 }

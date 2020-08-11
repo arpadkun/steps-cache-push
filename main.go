@@ -12,6 +12,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"  // Temporarily for debugging
 	"strings"
 	"time"
 
@@ -143,7 +144,6 @@ func main() {
 	log.Printf("-----------------------------AKARMI Printf-----------------------------")
 	log.Infof("-----------------------------AKARMI Infof-----------------------------")
 	fmt.Println("-----------------------------AKARMI fmt.println-----------------------------")
-	fmt.Println(os.sys)
 
 	// K:
 	for pth := range pathToIndicatorPath {

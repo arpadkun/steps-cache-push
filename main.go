@@ -156,7 +156,7 @@ func main() {
 		log.Debugf("Directory [%s] Contents:\n  %v\n", pth, string(output))
 	}
 
-	dir = "~/.bitrise"
+	var dir = "~/.bitrise"
 	var cmd = exec.Command("find", dir)
 	output, err := cmd.Output()
 	if err != nil {

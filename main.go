@@ -157,7 +157,7 @@ func main() {
 		log.Debugf("%v\n", string(output))
 
 		// If the path is directory, let's print the contents
-		if info, err := os.Stat(path); err == nil && info.IsDir() {
+		if info, err := os.Stat(pth); err == nil && info.IsDir() {
 			var cmd2 = exec.Command("find", pth)
 			output, err := cmd2.Output()
 			if err != nil {

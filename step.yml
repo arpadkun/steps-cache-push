@@ -64,7 +64,7 @@ inputs:
   - cache_paths: |
       $BITRISE_CACHE_DIR
     opts:
-      title: "Cache paths"
+      title: "Cache pathsAAAAAAAAAAAAAAAAAAAA"
       summary: Cache these paths. Separate paths with a newline.
       description: |-
         Cache these paths. Separate paths with a newline.

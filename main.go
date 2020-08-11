@@ -12,6 +12,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"  // Temporarily for debugging
 	"strings"
 	"time"
 
@@ -143,10 +144,17 @@ func main() {
 	log.Printf("-----------------------------AKARMI Printf-----------------------------")
 	log.Infof("-----------------------------AKARMI Infof-----------------------------")
 	fmt.Println("-----------------------------AKARMI fmt.println-----------------------------")
+	fmt.Println(os.sys)
 
 	// K:
 	for pth := range pathToIndicatorPath {
 		log.Debugf("EGY: %s", pth)
+		var cmd = exec.Command("find", pth)
+		output, err := cmd.Output()
+		if err != nil {
+			log.Debugf("Could not run find, failed")
+		}
+		log.Debugf("%v\n", string(output)
 	}
 
 	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")

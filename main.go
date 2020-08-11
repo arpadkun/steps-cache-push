@@ -139,7 +139,7 @@ func main() {
 	log.Infof("Generating cache archive")
 
 	// K:
-	for pth := range pathToIndicator {
+	for pth := range pathToIndicatorPath {
 		log.Debugf("EGY: %s", pth)
 	}
 

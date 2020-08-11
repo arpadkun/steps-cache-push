@@ -32,7 +32,7 @@ func logErrorfAndExit(format string, args ...interface{}) {
 func main() {
 	stepStartedAt := time.Now()
 	//K:
-	log.Debugf("AKARMI")
+	log.Debugf("-----------------------------AKARMI-----------------------------")
 	configs, err := ParseConfig()
 	if err != nil {
 		logErrorfAndExit(err.Error())

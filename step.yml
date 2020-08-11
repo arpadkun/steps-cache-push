@@ -147,7 +147,7 @@ inputs:
       value_options:
       - file-content-hash
       - file-mod-time
-  - is_debug_mode: "true"
+  - is_debug_mode: "false"
     opts:
       title: "Debug mode?"
       summary: "If debug mode is enabled, the step will print verbose logs."

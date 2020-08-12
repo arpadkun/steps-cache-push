@@ -148,7 +148,7 @@ func main() {
 	// K:  cycling through the files/directories that are required to be saved
 	log.Printf("============================================================================================")
 	for pth := range pathToIndicatorPath {
-		log.Printf("%s", pth)
+		// log.Printf("%s", pth)
 		// log.Printf("============================================================================================")
 		// log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
 		var cmd1 = exec.Command("file", pth)

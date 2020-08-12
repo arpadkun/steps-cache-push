@@ -11,8 +11,7 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/exec" // Temporarily for debugging
+	"os" // Temporarily for debugging
 	"strings"
 	"time"
 
@@ -146,26 +145,30 @@ func main() {
 	fmt.Println("-----------------------------AKARMI fmt.println-----------------------------")
 
 	// K:  cycling through the files/directories that are required to be saved
+	log.Printf("============================================================================================")
 	for pth := range pathToIndicatorPath {
-		log.Printf("============================================================================================")
-		log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
-		var cmd1 = exec.Command("file", pth)
-		output, err := cmd1.Output()
-		if err != nil {
-			log.Printf("Could not run find, failed")
-		}
-		log.Printf("%v\n", string(output))
+		log.Printf("%s", pth)
+		// log.Printf("============================================================================================")
+		// log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
+		// var cmd1 = exec.Command("file", pth)
+		// output, err := cmd1.Output()
+		// if err != nil {
+		// 	log.Printf("Could not run find, failed")
+		// }
+		// log.Printf("%v\n", string(output))
 
-		// If the path is directory, let's print the contents
-		if info, err := os.Stat(pth); err == nil && info.IsDir() {
-			var cmd2 = exec.Command("find", pth)
-			output, err := cmd2.Output()
-			if err != nil {
-				log.Printf("Could not run find, failed")
-			}
-			log.Printf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
-		}
+		// // If the path is directory, let's print the contents
+		// if info, err := os.Stat(pth); err == nil && info.IsDir() {
+		// 	var cmd2 = exec.Command("find", pth)
+		// 	output, err := cmd2.Output()
+		// 	if err != nil {
+		// 		log.Printf("Could not run find, failed")
+		// 	}
+		// 	log.Printf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
+		// }
 	}
+
+	log.Printf("============================================================================================")
 
 	//archive, err := NewArchive(cacheArchivePath, configs.CompressArchive == "true")
 	//if err != nil {

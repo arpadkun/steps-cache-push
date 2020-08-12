@@ -12,6 +12,7 @@ package main
 import (
 	"fmt"
 	"os" // Temporarily for debugging
+	"os/exec"
 	"strings"
 	"time"
 
@@ -150,12 +151,12 @@ func main() {
 		log.Printf("%s", pth)
 		// log.Printf("============================================================================================")
 		// log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
-		// var cmd1 = exec.Command("file", pth)
-		// output, err := cmd1.Output()
-		// if err != nil {
-		// 	log.Printf("Could not run find, failed")
-		// }
-		// log.Printf("%v\n", string(output))
+		var cmd1 = exec.Command("file", pth)
+		output, err := cmd1.Output()
+		if err != nil {
+			log.Printf("Could not run find, failed")
+		}
+		log.Printf("%v\n", string(output))
 
 		// // If the path is directory, let's print the contents
 		// if info, err := os.Stat(pth); err == nil && info.IsDir() {

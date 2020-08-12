@@ -147,23 +147,23 @@ func main() {
 
 	// K:  cycling through the files/directories that are required to be saved
 	for pth := range pathToIndicatorPath {
-		log.Debugf("============================================================================================")
-		log.Debugf("This is in the pathToIndicatorPath variable: %s", pth)
+		log.Printf("============================================================================================")
+		log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
 		var cmd1 = exec.Command("file", pth)
 		output, err := cmd1.Output()
 		if err != nil {
-			log.Debugf("Could not run find, failed")
+			log.Printf("Could not run find, failed")
 		}
-		log.Debugf("%v\n", string(output))
+		log.Printf("%v\n", string(output))
 
 		// If the path is directory, let's print the contents
 		if info, err := os.Stat(pth); err == nil && info.IsDir() {
 			var cmd2 = exec.Command("find", pth)
 			output, err := cmd2.Output()
 			if err != nil {
-				log.Debugf("Could not run find, failed")
+				log.Printf("Could not run find, failed")
 			}
-			log.Debugf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
+			log.Printf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
 		}
 	}
 
@@ -177,7 +177,7 @@ func main() {
 		logErrorfAndExit("Failed to get stack version info: %s", err)
 	}
 	// K:
-	log.Debugf("EGY stackVersionData: %s", stackData)
+	log.Printf("EGY stackVersionData: %s", stackData)
 
 	// This is the first file written, to speed up reading it in subsequent builds
 	//if err = archive.writeData(stackData, stackVersionsPath); err != nil {

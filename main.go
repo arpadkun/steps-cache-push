@@ -182,11 +182,12 @@ func main() {
 		fmt.Println(err)
 	} else {
 		for pth := range pathToIndicatorPath {
-			filesListFile.WriteString(string(pth))
+			filesListFile.WriteString(string(pth) + "\n")
 		}
 	}
 	filesListFile.Close()
 
+	// Configuring rsync parameters
 	rsyncSettingsSSHsetup := "/usr/bin/ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL

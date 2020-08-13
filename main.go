@@ -187,7 +187,7 @@ func main() {
 	}
 	filesListFile.Close()
 
-	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " "
+	rsyncSettingsSSHsetup := "-e \"ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + "\""
 	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " "
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL

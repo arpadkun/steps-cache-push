@@ -160,7 +160,7 @@ func main() {
 	LocalCacheFilesListFile := HomeDir + "/.local_cache_file_list"
 	LocalCacheFilesDstURL := os.Getenv("LOCAL_CACHE_DST_URL")
 	LocalCacheStoragePort := "22"
-	//LocalCacheStoragePortTimeout := "3"
+	LocalCacheStoragePortTimeout := "3"
 
 	// Write ssh key file
 	file, err := os.Create(LocalCacheStorageSSHKeyFile)

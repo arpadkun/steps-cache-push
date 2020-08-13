@@ -159,8 +159,8 @@ func main() {
 	LocalCacheStorageSSHKeyFile := HomeDir + "/.ssh/local_cache.key"
 	LocalCacheFilesListFile := HomeDir + "/.local_cache_file_list"
 	LocalCacheFilesDstURL := os.Getenv("LOCAL_CACHE_DST_URL")
-	//LocalCacheStoragePort := "22"
-	//LocalCacheStoragePortTimeout := "3"
+	LocalCacheStoragePort := "22"
+	LocalCacheStoragePortTimeout := "3"
 
 	// Write ssh key file
 	file, err := os.Create(LocalCacheStorageSSHKeyFile)
@@ -187,8 +187,8 @@ func main() {
 	}
 	filesListFile.Close()
 
-	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout
-	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " "
+	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " "
+	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " "
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "--checksum", "/", rsyncSettingsDestinationURL}

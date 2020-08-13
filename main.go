@@ -193,7 +193,7 @@ func main() {
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--checksum", "/", rsyncSettingsDestinationURL}
 
-	//fmt.Printf("%v", rsyncArgs)
+	fmt.Printf("%v", rsyncArgs)
 
 	cmd := exec.Command("rsync", rsyncArgs...)
 

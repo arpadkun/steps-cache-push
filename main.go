@@ -190,7 +190,7 @@ func main() {
 	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
-	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--checksum", "--progress", "/", rsyncSettingsDestinationURL}
+	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--checksum", "/", rsyncSettingsDestinationURL}
 
 	//fmt.Printf("%v", rsyncArgs)
 

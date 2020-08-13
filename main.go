@@ -189,8 +189,8 @@ func main() {
 
 	//rsyncSettingsSSHsetup := "-e \"ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + "\""
 	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout
-	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
-	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort
+	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
+	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "--checksum", "/", rsyncSettingsDestinationURL}

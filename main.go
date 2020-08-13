@@ -189,7 +189,7 @@ func main() {
 
 	//rsyncSettingsSSHsetup := "-e \"ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + "\""
 	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout
-	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
+	rsyncSettingsSSHsetup := "-e /usr/bin/ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
 	//rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL

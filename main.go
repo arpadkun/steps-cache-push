@@ -10,6 +10,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os" // Temporarily for debugging
 	"os/exec"
@@ -145,29 +146,85 @@ func main() {
 	log.Infof("-----------------------------AKARMI Infof-----------------------------")
 	fmt.Println("-----------------------------AKARMI fmt.println-----------------------------")
 
-	// K:  cycling through the files/directories that are required to be saved
-	log.Printf("============================================================================================")
-	for pth := range pathToIndicatorPath {
-		// log.Printf("%s", pth)
-		// log.Printf("============================================================================================")
-		// log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
-		var cmd1 = exec.Command("file", pth)
-		output, err := cmd1.Output()
-		if err != nil {
-			log.Printf("Could not run find, failed")
-		}
-		log.Printf("%v\n", string(output))
+	// Requirements, set up ENV Variables as secrets <-----:
+	// LOCAL_CACHE_DST_URL
+	// LOCAL_CACHE_KEY
 
-		// // If the path is directory, let's print the contents
-		// if info, err := os.Stat(pth); err == nil && info.IsDir() {
-		// 	var cmd2 = exec.Command("find", pth)
-		// 	output, err := cmd2.Output()
-		// 	if err != nil {
-		// 		log.Printf("Could not run find, failed")
-		// 	}
-		// 	log.Printf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
-		// }
+	// Getting the ssh key into variable
+	LocalCacheKey := os.Getenv("LOCAL_CACHE_KEY")
+	LocalCacheKeyDecoded, _ := base64.URLEncoding.DecodeString(LocalCacheKey)
+
+	// Write the ssh key to file
+	HomeDir := os.Getenv("HOME")
+	LocalCacheStorageSSHKeyFile := HomeDir + "/.ssh/local_cache.key"
+	LocalCacheFilesListFile := HomeDir + "/.local_cache_file_list"
+	LocalCacheFilesDstURL := os.Getenv("LOCAL_CACHE_DST_URL")
+	LocalCacheStoragePort := "22"
+	LocalCacheStoragePortTimeout := "3"
+
+	// Write ssh key file
+	file, err := os.Create(LocalCacheStorageSSHKeyFile)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		file.WriteString(string(LocalCacheKeyDecoded))
 	}
+	file.Close()
+
+	err = os.Chmod(LocalCacheStorageSSHKeyFile, 0600)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Write file list to sync to LocalCacheFilesListFile
+	filesListFile, err := os.Create(LocalCacheFilesListFile)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for pth := range pathToIndicatorPath {
+			filesListFile.WriteString(string(pth))
+		}
+	}
+	filesListFile.Close()
+
+	rsyncSettingsSSHsetup := "-e ssh -i " + LocalCacheStorageSSHKeyFile + " -p " + LocalCacheStoragePort + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout
+	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
+	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
+	rsyncArgs := []string{rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--checksum", "--progress", "/", rsyncSettingsDestinationURL}
+
+	//fmt.Printf("%v", rsyncArgs)
+
+	cmd := exec.Command("rsync", rsyncArgs...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		os.Stderr.WriteString(fmt.Sprintf("==> Error: %v\n", err.Error()))
+	}
+	log.Printf("%v\n", string(output))
+
+	// K:  cycling through the files/directories that are required to be saved
+	// log.Printf("\n============================================================================================")
+	// for pth := range pathToIndicatorPath {
+	// 	// log.Printf("%s", pth)
+	// 	// log.Printf("============================================================================================")
+	// 	// log.Printf("This is in the pathToIndicatorPath variable: %s", pth)
+	// 	var cmd1 = exec.Command("file", pth)
+	// 	output, err := cmd1.Output()
+	// 	if err != nil {
+	// 		log.Printf("Could not run find, failed")
+	// 	}
+	// 	log.Printf("%v\n", string(output))
+
+	// 	// // If the path is directory, let's print the contents
+	// 	// if info, err := os.Stat(pth); err == nil && info.IsDir() {
+	// 	// 	var cmd2 = exec.Command("find", pth)
+	// 	// 	output, err := cmd2.Output()
+	// 	// 	if err != nil {
+	// 	// 		log.Printf("Could not run find, failed")
+	// 	// 	}
+	// 	// 	log.Printf("------------ Directory [%s] Contents ------------:\n  %v\n", pth, string(output))
+	// 	// }
+	// }
 
 	log.Printf("============================================================================================")
 

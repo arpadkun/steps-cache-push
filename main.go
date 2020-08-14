@@ -79,11 +79,15 @@ func main() {
 	startTime = time.Now()
 
 	log.Infof("Checking previous cache status")
+	log.Warnf("-----------------------------AKARMI Warnf-----------------------------")
 
 	prevDescriptor, err := readCacheDescriptor(cacheInfoFilePath)
 	if err != nil {
 		logErrorfAndExit("Failed to read previous cache descriptor: %s", err)
 	}
+
+	// K!
+	fmt.Printf("prevDescriptor: %v\n", prevDescriptor)
 
 	if prevDescriptor != nil {
 		log.Printf("Previous cache info found at: %s", cacheInfoFilePath)
@@ -95,6 +99,10 @@ func main() {
 	if err != nil {
 		logErrorfAndExit("Failed to create current cache descriptor: %s", err)
 	}
+	// K!
+	fmt.Printf("curDescriptor: %v\n", curDescriptor)
+
+	log.Warnf("-----------------------------AKARMI Warnf-----------------------------")
 
 	log.Donef("Done in %s\n", time.Since(startTime))
 
@@ -141,7 +149,6 @@ func main() {
 
 	//K:
 	log.Debugf("-----------------------------AKARMI debug-----------------------------")
-	log.Warnf("-----------------------------AKARMI Warnf-----------------------------")
 	log.Printf("-----------------------------AKARMI Printf-----------------------------")
 	log.Infof("-----------------------------AKARMI Infof-----------------------------")
 	fmt.Println("-----------------------------AKARMI fmt.println-----------------------------")

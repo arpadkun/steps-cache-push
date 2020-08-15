@@ -78,16 +78,10 @@ func main() {
 	// Check previous cache
 	startTime = time.Now()
 
-	log.Infof("Checking previous cache status")
-	log.Warnf("-----------------------------AKARMI Warnf-----------------------------")
-
 	prevDescriptor, err := readCacheDescriptor(cacheInfoFilePath)
 	if err != nil {
 		logErrorfAndExit("Failed to read previous cache descriptor: %s", err)
 	}
-
-	// K!
-	fmt.Printf("prevDescriptor: %v\n", prevDescriptor)
 
 	if prevDescriptor != nil {
 		log.Printf("Previous cache info found at: %s", cacheInfoFilePath)
@@ -99,8 +93,6 @@ func main() {
 	if err != nil {
 		logErrorfAndExit("Failed to create current cache descriptor: %s", err)
 	}
-	// K!
-	fmt.Printf("curDescriptor: %v\n", curDescriptor)
 
 	log.Warnf("-----------------------------AKARMI Warnf-----------------------------")
 
@@ -191,6 +183,7 @@ func main() {
 		for pth := range pathToIndicatorPath {
 			filesListFile.WriteString(string(pth) + "\n")
 		}
+		filesListFile.WriteString(string(LocalCacheFilesListFile) + "\n") // Write the file containing the file list at the end to send up to cache
 	}
 	filesListFile.Close()
 

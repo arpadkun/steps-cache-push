@@ -12,9 +12,11 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"os" // Temporarily for debugging
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bitrise-io/go-utils/log"
@@ -29,6 +31,69 @@ const (
 func logErrorfAndExit(format string, args ...interface{}) {
 	log.Errorf(format, args...)
 	os.Exit(1)
+}
+
+/////////////////////////////////////////////
+// rsync process' function
+func rsyncProcess(receivedRsyncParams []string) (string, error) {
+
+	rsynccmd := exec.Command("rsync", receivedRsyncParams...)
+
+	var output string
+	rsyncoutput, err := rsynccmd.CombinedOutput()
+	if err != nil {
+		output = string(rsyncoutput)
+		return output, err
+	}
+
+	output = string(rsyncoutput)
+	return output, nil
+}
+
+// Worker for parallel processing (running rsync on multiple threads)
+func worker(id int, LocalCacheFilesListFile string, FilesForOneWorker []string, wg *sync.WaitGroup) {
+
+	defer wg.Done()
+
+	fmt.Printf("\n------------------------\nWorker %d starting\n", id)
+	LocalCacheFilesListFileWorkerID := LocalCacheFilesListFile + "." + strconv.Itoa(id)
+	fmt.Printf("Writing chunk for worker %d to: %v\n", id, LocalCacheFilesListFileWorkerID)
+
+	// Write file list chunk to temporary sync to LocalCacheFilesListFile.worker#
+	filesListFile, err := os.Create(LocalCacheFilesListFileWorkerID)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for _, pth := range FilesForOneWorker {
+			filesListFile.WriteString(string(pth) + "\n")
+		}
+	}
+	filesListFile.Close()
+
+	// NEED TO FIX -- restructure to remove these variables, testing only...
+	HomeDir := os.Getenv("HOME")
+	LocalCacheStorageSSHKeyFile := HomeDir + "/.ssh/local_cache.key"
+	LocalCacheFilesDstURL := os.Getenv("LOCAL_CACHE_DST_URL")
+	LocalCacheStoragePort := "22"
+	LocalCacheStoragePortTimeout := "3"
+
+	rsyncSettingsSSHsetup := "/usr/bin/ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
+	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFileWorkerID
+	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
+
+	rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "--copy-dirlinks", "/", rsyncSettingsDestinationURL}
+	fmt.Printf("DEBUG:  %v\n\n", rsyncArgs)
+
+	// Starting the rsync process here
+	output, err := rsyncProcess(rsyncArgs)
+	if err != nil {
+		os.Stderr.WriteString(fmt.Sprintf("==> rsync error:\n%v\n\n", err.Error()))
+	}
+	log.Printf("==> rsync output:\n%v\n\n", string(output))
+
+	//fmt.Printf("#v:  %#v\n\n", FilesForOneWorker)
+	//time.Sleep(time.Second)
+	fmt.Printf("Worker %d done\n", id)
 }
 
 func main() {
@@ -152,14 +217,12 @@ func main() {
 	// Getting the ssh key into variable
 	LocalCacheKey := os.Getenv("LOCAL_CACHE_KEY")
 	LocalCacheKeyDecoded, _ := base64.URLEncoding.DecodeString(LocalCacheKey)
+	numCPU := 6
 
 	// Write the ssh key to file
 	HomeDir := os.Getenv("HOME")
 	LocalCacheStorageSSHKeyFile := HomeDir + "/.ssh/local_cache.key"
 	LocalCacheFilesListFile := HomeDir + "/.local_cache_file_list"
-	LocalCacheFilesDstURL := os.Getenv("LOCAL_CACHE_DST_URL")
-	LocalCacheStoragePort := "22"
-	LocalCacheStoragePortTimeout := "3"
 
 	// Write ssh key file
 	file, err := os.Create(LocalCacheStorageSSHKeyFile)
@@ -187,21 +250,72 @@ func main() {
 	}
 	filesListFile.Close()
 
-	// Configuring rsync parameters
-	rsyncSettingsSSHsetup := "/usr/bin/ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
-	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
-	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
-	rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL}
-
-	//fmt.Printf("%v", rsyncArgs)
-
-	cmd := exec.Command("rsync", rsyncArgs...)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("==> Error: %v\n", err.Error()))
+	// Create an array of the files in mem so we can chunk them into pieces
+	var FilesToSync []string
+	for path := range pathToIndicatorPath {
+		FilesToSync = append(FilesToSync, path)
 	}
-	log.Printf("%v\n", string(output))
+	FilesToSync = append(FilesToSync, LocalCacheFilesListFile)
+
+	// Split up the list ~equally for parallel processing, but only if there are more than a 100 items:
+	numberOfFiles := len(FilesToSync)
+	if numberOfFiles == 0 {
+		log.Infof("File list is empty, nothing to sync")
+		return
+	}
+
+	if numberOfFiles < 100 {
+		numCPU = 1
+	}
+
+	fmt.Printf("Number of files to sync: %#v\n", numberOfFiles)
+	fmt.Printf("Workers to spawn: %#v\n", numCPU)
+
+	var filesDivided [][]string
+	chunkSize := (len(FilesToSync) + numCPU - 1) / numCPU
+	fmt.Printf("Chunksize per worker: %#v\n", chunkSize)
+
+	for i := 0; i < len(FilesToSync); i += chunkSize {
+		end := i + chunkSize
+		if end > len(FilesToSync) {
+			end = len(FilesToSync)
+		}
+
+		filesDivided = append(filesDivided, FilesToSync[i:end])
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Spin up workers
+	log.Infof("Syncing files now...")
+
+	var wg sync.WaitGroup
+
+	for i := 0; i <= numCPU-1; i++ {
+		wg.Add(1)
+
+		go worker(i, LocalCacheFilesListFile, filesDivided[i], &wg)
+	}
+
+	wg.Wait()
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// // OLD PATH
+	// // Configuring rsync parameters
+	// rsyncSettingsSSHsetup := "/usr/bin/ssh -i " + LocalCacheStorageSSHKeyFile + " -o ConnectTimeout=" + LocalCacheStoragePortTimeout + " -p " + LocalCacheStoragePort
+	// rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFile
+	// rsyncSettingsDestinationURL := LocalCacheFilesDstURL
+	// rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL}
+
+	// //fmt.Printf("%v", rsyncArgs)
+
+	// cmd := exec.Command("rsync", rsyncArgs...)
+
+	// output, err := cmd.CombinedOutput()
+	// if err != nil {
+	// 	os.Stderr.WriteString(fmt.Sprintf("==> Error: %v\n", err.Error()))
+	// }
+	// log.Printf("%v\n", string(output))
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// K:  cycling through the files/directories that are required to be saved
 	// log.Printf("\n============================================================================================")

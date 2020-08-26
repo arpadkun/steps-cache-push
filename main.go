@@ -81,7 +81,7 @@ func worker(id int, LocalCacheFilesListFile string, FilesForOneWorker []string, 
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFileWorkerID
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 
-	rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "--copy-dirlinks", "/", rsyncSettingsDestinationURL}
+	rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL} // "--copy-dirlinks",
 	fmt.Printf("DEBUG:  %v\n\n", rsyncArgs)
 
 	// Starting the rsync process here
@@ -217,7 +217,7 @@ func main() {
 	// Getting the ssh key into variable
 	LocalCacheKey := os.Getenv("LOCAL_CACHE_KEY")
 	LocalCacheKeyDecoded, _ := base64.URLEncoding.DecodeString(LocalCacheKey)
-	numCPU := 6
+	numCPU := os.Getenv("LOCAL_CACHE_SYNC_WORKERS")
 
 	// Write the ssh key to file
 	HomeDir := os.Getenv("HOME")

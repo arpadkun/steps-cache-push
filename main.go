@@ -217,7 +217,7 @@ func main() {
 	// Getting the ssh key into variable
 	LocalCacheKey := os.Getenv("LOCAL_CACHE_KEY")
 	LocalCacheKeyDecoded, _ := base64.URLEncoding.DecodeString(LocalCacheKey)
-	numCPU := os.Getenv("LOCAL_CACHE_SYNC_WORKERS")
+	numCPU, err := strconv.Atoi(os.Getenv("LOCAL_CACHE_SYNC_WORKERS"))
 
 	// Write the ssh key to file
 	HomeDir := os.Getenv("HOME")

@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -256,6 +257,7 @@ func main() {
 		FilesToSync = append(FilesToSync, path)
 	}
 	FilesToSync = append(FilesToSync, LocalCacheFilesListFile)
+	sort.Strings(FilesToSync)
 
 	// Split up the list ~equally for parallel processing, but only if there are more than a 100 items:
 	numberOfFiles := len(FilesToSync)

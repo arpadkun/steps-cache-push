@@ -38,7 +38,7 @@ func logErrorfAndExit(format string, args ...interface{}) {
 // rsync process' function
 func rsyncProcess(receivedRsyncParams []string) (string, error) {
 
-	rsynccmd := exec.Command("rsync", receivedRsyncParams...)
+	rsynccmd := exec.Command("time", receivedRsyncParams...)
 
 	var output string
 	rsyncoutput, err := rsynccmd.CombinedOutput()
@@ -82,7 +82,7 @@ func worker(id int, LocalCacheFilesListFile string, FilesForOneWorker []string, 
 	rsyncSettingsFilesFrom := "--files-from=" + LocalCacheFilesListFileWorkerID
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 
-	rsyncArgs := []string{"-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL} // "--copy-dirlinks",
+	rsyncArgs := []string{"rsync", "-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL} // "--copy-dirlinks",
 	fmt.Printf("DEBUG:  %v\n\n", rsyncArgs)
 
 	// Starting the rsync process here

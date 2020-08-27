@@ -240,23 +240,20 @@ func main() {
 	}
 
 	// Write file list to sync to LocalCacheFilesListFile
+	var FilesToSync []string // This is used later to create the chunks
 	filesListFile, err := os.Create(LocalCacheFilesListFile)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		for pth := range pathToIndicatorPath {
 			filesListFile.WriteString(string(pth) + "\n")
+			FilesToSync = append(FilesToSync, pth) // Create an array of the files in mem so we can chunk them into pieces
 		}
 		filesListFile.WriteString(string(LocalCacheFilesListFile) + "\n") // Write the file containing the file list at the end to send up to cache
+		FilesToSync = append(FilesToSync, LocalCacheFilesListFile)
 	}
 	filesListFile.Close()
 
-	// Create an array of the files in mem so we can chunk them into pieces
-	var FilesToSync []string
-	for path := range pathToIndicatorPath {
-		FilesToSync = append(FilesToSync, path)
-	}
-	FilesToSync = append(FilesToSync, LocalCacheFilesListFile)
 	sort.Strings(FilesToSync)
 
 	// Split up the list ~equally for parallel processing, but only if there are more than a 100 items:

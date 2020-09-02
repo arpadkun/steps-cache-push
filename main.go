@@ -84,7 +84,7 @@ func worker(id int, LocalCacheFilesListFile string, FilesForOneWorker []string, 
 	rsyncSettingsDestinationURL := LocalCacheFilesDstURL
 
 	rsyncArgs := []string{"rsync", "-e", rsyncSettingsSSHsetup, rsyncSettingsFilesFrom, "--dirs", "--relative", "--archive", "--no-D", "--inplace", "--executability", "--delete", "--ignore-errors", "--force", "--compress", "--stats", "--human-readable", "--no-whole-file", "--prune-empty-dirs", "/", rsyncSettingsDestinationURL} // "--copy-dirlinks",
-	fmt.Printf("DEBUG:  %v\n\n", rsyncArgs)
+	//fmt.Printf("DEBUG:  %v\n\n", rsyncArgs)
 
 	// Starting the rsync process here
 	output, err := rsyncProcess(rsyncArgs)
@@ -288,10 +288,11 @@ func main() {
 	// Write the ssh key to file
 	HomeDir := os.Getenv("HOME")
 	LocalCacheStorageSSHKeyFile := HomeDir + "/.ssh/local_cache.key"
-	LocalCacheFilesListDir := HomeDir + "/.local_cache_xfer_lists"                  // Dir - file lists go into this directory (control plane)
-	LocalCacheFilesListFile := LocalCacheFilesListDir + "/local_cache_file_list"    // File - list of all files to transfer
-	LocalCacheLargeFilesDirXferList := LocalCacheFilesListDir + "/chunked_dir_list" // File - list containing which directories were tar'ed and chunked up
-	LocalCacheLargeFilesDirXferDir := HomeDir + "/.local_cache_xfer"                // Dir - for large file chunks that are split up (data plane)
+	LocalCacheFilesListDir := HomeDir + "/.local_cache_xfer_lists"                      // Dir - file lists go into this directory (control plane)
+	LocalCacheFilesListFile := LocalCacheFilesListDir + "/local_cache_file_list"        // File - list of all files to transfer
+	LocalCacheLargeFilesDirXferList := LocalCacheFilesListDir + "/chunked_dir_list"     // File - list containing which directories were tar'ed and chunked up
+	LocalCacheLargeFilesDirXferChunks := LocalCacheFilesListDir + "/chunked_dir_chunks" // File - list containing the split tar file names, like xaa, xab, etc... Using this to send up what needs to be pulled
+	LocalCacheLargeFilesDirXferDir := HomeDir + "/.local_cache_xfer"                    // Dir - for large file chunks that are split up (data plane)
 
 	// Write ssh key file
 	file, err := os.Create(LocalCacheStorageSSHKeyFile)
@@ -339,7 +340,7 @@ func main() {
 
 				// tar -lcf ~/.ssh/akarmi.tar /Users/kharpeet/Local_Workdir/kubernetes/.git
 				tarDirArgs := []string{"tar", "-lcf", archiveName, packThisDir}
-				fmt.Printf("ARGS:  %v\n", tarDirArgs)
+				//fmt.Printf("ARGS:  %v\n", tarDirArgs)
 				tarDir := exec.Command("time", tarDirArgs...) // Running tar process here
 				tarDiroutput, err := tarDir.CombinedOutput()
 				if err != nil {
@@ -358,15 +359,14 @@ func main() {
 				if size < 52428800 { // 50MB = 50*1024*1024
 					log.Warnf("Large Directory Archive size is under 50MB, is this okay? Skipping chunking archive will move in a single file, continue...")
 					tarChunkSizePerCPU = size
-					// TODO
 				} else {
 					tarChunkSizePerCPU = (size / int64(numCPU)) + 1 // +1 byte to make sure there is no small remainder file at the end
 				}
 
 				sizeGB := float64(size) / 1073741824 // (1024.0 * 1024.0 * 1024.0)
 				tarChunkSizePerCPUGB := float64(tarChunkSizePerCPU) / 1073741824
-				fmt.Printf("RAW SIZE: %v\n", size)
-				fmt.Printf("RAW CHUNKSIZE: %v\n", tarChunkSizePerCPU)
+				fmt.Printf("DEBUG:  RAW SIZE: %v, CHUNKSIZE: %v\n", size, tarChunkSizePerCPU)
+
 				fmt.Printf("Archive to move (tar):  %.4f GB, Chunk size per worker: %.4f\n", sizeGB, tarChunkSizePerCPUGB)
 
 				// Split the tar in 100MB chunks
@@ -374,7 +374,7 @@ func main() {
 				archiveSplittedFilesPattern := archiveDir + "/x"
 				tarChunkSizePerCPUstring := strconv.FormatInt(tarChunkSizePerCPU, 10)
 				splitTarArgs := []string{"split", "-b", tarChunkSizePerCPUstring, archiveName, archiveSplittedFilesPattern}
-				fmt.Printf("ARGS:  %v\n", splitTarArgs)
+				//fmt.Printf("ARGS:  %v\n", splitTarArgs)
 				splitTar := exec.Command("time", splitTarArgs...) // Running tar process here
 				splitTaroutput, err := splitTar.CombinedOutput()
 				if err != nil {
@@ -404,6 +404,18 @@ func main() {
 		xferList.Close()
 	}
 
+	// Write chunk list to file (LocalCacheLargeFilesDirXferChunks)
+	writeChunkFile, err := os.Create(LocalCacheLargeFilesDirXferChunks)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for _, onechunk := range xferChunkFileList {
+			writeChunkFile.WriteString(string(onechunk) + "\n")
+		}
+
+	}
+	writeChunkFile.Close()
+
 	// Write file list to sync to LocalCacheFilesListFile
 	// 1: Write all the files that come from the User via ENV var
 	// 2: Write the lists that were generated at the end to make sure they all make it to the cache:
@@ -424,6 +436,10 @@ func main() {
 
 		filesListFile.WriteString(string(LocalCacheLargeFilesDirXferList) + "\n") // Write the file containing the list of directories what we CHUNKED up, we need that list at the end to send up to cache so we can reconstruct on pull // CONTROL PLANE
 		FilesToSync = append(FilesToSync, LocalCacheLargeFilesDirXferList)
+
+		filesListFile.WriteString(string(LocalCacheLargeFilesDirXferChunks) + "\n") // Write the file containing the list chunk files (xaa, xab...) we need that list at the end to send up to cache so we can reconstruct on pull // DATA PLANE
+		FilesToSync = append(FilesToSync, LocalCacheLargeFilesDirXferChunks)
+
 	}
 	filesListFile.Close()
 

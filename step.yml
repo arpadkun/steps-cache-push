@@ -63,8 +63,9 @@ run_if: ".IsCI | and (not .IsPR)"
 inputs:
   - cache_paths: |
       $BITRISE_CACHE_DIR
+      /Users/kharpeet/Local_Workdir/kubernetes
     opts:
-      title: "Cache pathsAAAAAAAAAAAAAAAAAAAA"
+      title: "Cache paths"
       summary: Cache these paths. Separate paths with a newline.
       description: |-
         Cache these paths. Separate paths with a newline.
@@ -79,6 +80,30 @@ inputs:
         this step to fail. It'll be logged but the step will try to gather
         as many specified & valid paths as it can, and just print a warning
         about the invalid items.
+  - dir_with_large_file: |
+      $BITRISE_SOURCE_DIR/.git
+      /Users/kharpeet/Local_Workdir/kubernetes/.git
+    opts:
+      title: "Directories with large files"
+      summary: Directory list that have large (800MB+) files
+      description: |-
+        To speed up cache syncing you can specify a list of directories that contain large
+        files. Pulling single large files out from cache can take long, therefore the
+        contents of the directories you list here are going to be handled differently.
+        Everything in the directory recursively will be packed and then split into pieces
+        so we can pull out the individual chunks in parallel from cache to speed up the process. 
+        
+        **Important**: **do not list directories with many small-mid size files**, transferring 
+        and comparing small-mid size files is fast by default unlisted. Only list directories here that have 
+        large files.
+        Typically with large code repos the `.git` directory will contain a few large files, which can
+        grow into multiple GB. (Packs, sqlite db files. Therefore by default for faster speed we handle these
+        as a directory with large files.)
+        
+        You have to use absolute path. Example:<br>
+        `/Users/vagrant/git/.git`
+        or
+        `$BITRISE_SOURCE_DIR/.git`
   - ignore_check_on_paths:
     opts:
       title: "Ignore Paths from change check"
